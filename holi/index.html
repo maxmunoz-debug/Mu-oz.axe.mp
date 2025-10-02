@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Fliz Cumpleaños! 🎉</title>
+    <style>
+        /* --- 1. Variables y Estilos Generales --- */
+        :root {
+            --birthday-pink: #ff69b4;
+            --secondary-color: #e355c7a6;
+            --text-color: #333;
+            --container-bg: rgba(255, 255, 255, 0.95);
+        }
+
+    /* Estilos generales del body */
+    body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #ffb6c1 0%, #add8e6 100%);
+            color: var(--text-color);
+            text-align: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Estilos para la Responsividad y Contenedor --- */
+    /* Contenedor principal oculto al inicio */
+    #container {
+            width: 90%; 
+            max-width: 450px; 
+            background-color: var(--container-bg);
+            padding: 30px 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            border: 2px solid var(--birthday-pink);
+            display: none; 
+            margin-top: 20px; 
+            margin-bottom: 20px;
+            overflow: hidden; 
+        }
+        
+        /* AJUSTE CLAVE: Texto más pequeño y adaptable para móviles */
+    /* Estilos para pantallas pequeñas (móviles) */
+    @media (max-width: 600px) {
+    #birthday-message { 
+        font-size: 1.3em !important; /* Más pequeño para móviles */
+        line-height: 1.1;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    #intro-message-container { font-size: 1.1em !important; }
+    #cake { font-size: 1.5em !important; }
+}
+        /* ... (Secciones de Intro y Verificación - Sin cambios) ... */
+    /* Pantalla de introducción con fondo oscuro */
+    #intro-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #333; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+    /* Mensaje de introducción con efecto máquina de escribir */
+    #intro-message-container {
+            border-right: .15em solid rgb(203, 49, 141); font-size: 1.2em; white-space: nowrap; overflow: hidden;
+            margin: 0 auto; color: var(--secondary-color); padding: 5px 0;
+        }
+    /* Sección de verificación de fecha */
+    #verification-section {
+            display: block; 
+        }
+    /* Estilos para los inputs del formulario */
+    #input-form input {
+            padding: 10px; border: 2px solid var(--birthday-pink); border-radius: 8px; 
+            width: 80%; max-width: 250px; text-align: center; margin: 8px auto 20px auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); display: block; transition: border-color 0.3s ease;
+        }
+    /* Botón de verificación */
+    #input-form button {
+            background-color: var(--birthday-pink); color: white; padding: 12px 25px; border: none;
+            border-radius: 25px; cursor: pointer; font-size: 1.1em; font-weight: bold;
+            letter-spacing: 1px; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- 3. Contenedor de Animación y Tarjeta --- */
+    /* Contenedor de animación de cumpleaños */
+    #animation-container {
+            display: none; 
+            padding: 20px 0;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; 
+        }
+
+    /* Mensaje principal de cumpleaños animado */
+    #birthday-message {
+            font-size: 2em;
+            color: var(--birthday-pink); font-weight: bold;
+            animation: pulse 1s infinite alternate; text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            margin-bottom: 10px; 
+            white-space: normal; 
+            line-height: 1.1;
+        }
+
+        /* ESTILOS DE LOS EMPOJIS DE ANIMACIÓN (Añadidos para que se vean) */
+    /* Estilos para el emoji de torta */
+    #cake {
+            font-size: 1.8em;
+            line-height: 0.8;
+            color: #5d4037; /* Color de base para la torta de texto */
+            margin: 15px auto; 
+            max-width: 100%; 
+        }
+    /* Velas animadas sobre la torta */
+    .candle {
+            color: #d73bb5; 
+            animation: flicker 0.5s infinite alternate;
+            display: inline-block;
+            margin: 0 2px;
+        }
+
+        /* GLOBOS FLOTANTES */
+    /* Globos animados flotando */
+    .balloon {
+            position: fixed;
+            font-size: 1.5em;
+            animation: float 10s infinite ease-out;
+            bottom: -50px; /* Inicia debajo de la pantalla */
+            opacity: 0;
+            z-index: 50;
+        }
+        
+        /* CONFETI CAYENDO */
+    /* Confeti animado cayendo */
+    .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00; /* Color inicial, se sobreescribe en JS */
+            animation: fall 5s infinite;
+            top: -10px; /* Inicia encima de la pantalla */
+            opacity: 0;
+            z-index: 50;
+        }
+        
+        /* --- Estilos para la Tarjeta de Felicitación (Ocultos) --- */
+    /* Tarjeta de felicitación oculta al inicio */
+    #card-section {
+            display: none; 
+            width: 100%;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--secondary-color);
+        }
+
+    /* Estilos para el texto personalizado de la tarjeta */
+    #custom-card-text {
+            width: 95%; max-width: 350px; height: 150px; padding: 15px;
+            border: 2px solid var(--secondary-color); border-radius: 10px;
+            font-size: 1.1em; line-height: 1.5; resize: vertical;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Botón para mostrar la tarjeta de felicitación */
+    #show-card-btn {
+            background-color: var(--secondary-color);
+            color: #333; padding: 15px 30px; border: none; border-radius: 25px; cursor: pointer;
+            font-size: 1.2em; font-weight: bold; margin-top: 30px; transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Keyframes de Animaciones */
+    /* Animación de pulso para el mensaje */
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+    /* Animación de parpadeo para las velas */
+    @keyframes flicker { from { opacity: 1; } to { opacity: 0.8; } }
+    /* Animación de caída para el confeti */
+    @keyframes fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
+    /* Animación de flotación para los globos */
+    @keyframes float { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 50% { transform: translateY(-70vh) rotate(5deg); opacity: 1; } 100% { transform: translateY(-120vh) rotate(-5deg); opacity: 0; } }
+        /* ... (floatBackground se mantiene igual) ... */
+
+    </style> <!-- Fin de estilos -->
+</head>
+<body> <!-- Cuerpo principal de la página -->
+
+    <!-- Globos de fondo decorativos -->
+    <div class="background-balloon"></div>
+    <div class="background-balloon"></div>
+    <div class="background-balloon"></div>
+    <div class="background-balloon"></div>
+    <div class="background-balloon"></div>
+
+    <!-- Pantalla de introducción con mensaje y click para continuar -->
+    <div id="intro-screen" onclick="hideIntroScreen()">
+        <div id="intro-message-container"></div>
+        <p style="margin-top: 50px; font-size: 1.2em; color: #aaa;">Haz clic en la pantalla para continuar.</p>
+    </div>
+    
+    <!-- Audio de fondo para cumpleaños -->
+    <audio id="birthday-song" src="https://cdn.pixabay.com/audio/2022/10/16/audio_125294b2c7.mp3" loop preload="auto"></audio>
+    <audio id="success-sound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9c7b7b.mp3" preload="auto"></audio>
+    <audio id="error-sound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9c7b7b.mp3" preload="auto"></audio>
+
+    <!-- Contenedor principal oculto al inicio -->
+    <div id="container">
+        
+    <!-- Sección para verificar la fecha de cumpleaños -->
+    <div id="verification-section">
+            <!-- Mensaje de estado -->
+            <h2 id="status-message">Hoy es una fecha muy importante 🎂</h2>
+
+            <!-- Formulario para ingresar nombre, día y mes -->
+            <div id="input-form">
+                <!-- Input para el nombre -->
+                <label for="name">Tu nombre (opcional) :</label>
+                <input type="text" id="name" placeholder="Ej. Max">
+
+                <!-- Input para el día -->
+                <label for="day">¿Qué día es hoy? (1-31):</label>
+                <input type="number" id="day" min="1" max="31" required>
+                
+                <!-- Input para el mes -->
+                <label for="month">¿De qué mes? (1-12):</label>
+                <input type="number" id="month" min="1" max="12" required>
+
+                <!-- Botón para verificar la fecha -->
+                <button onclick="verificarFecha()">Verificar</button>
+            </div>
+        </div>
+
+    <!-- Contenedor de animación de cumpleaños -->
+    <div id="animation-container">
+            <!-- Mensaje animado de cumpleaños -->
+            <h1 id="birthday-message">🎉 ¡FELIZ CUMPLEAÑOS! 🎉</h1>
+            <!-- Emoji de torta con velas -->
+            <div id="cake">
+                <span class="candle">🔥</span><span class="candle">🔥</span><span class="candle">🔥</span>
+                <br>
+                🎂🎂🎂🎂🎂
+                <br>
+                █████████ 
+            </div>
+            <!-- Mensaje personalizado -->
+            <p style="margin-top: 20px;">¡Te quiero mucho, eres la mejor persona que pude tener en mi vida !</p>
+
+            <!-- Botón para mostrar la tarjeta de felicitación -->
+            <button id="show-card-btn" onclick="showCardSection()" style="display: none;">Espero te guste, ver:</button>
+            
+            <!-- Tarjeta de felicitación con mensaje final -->
+            <div id="card-section">
+    <h3>💌 Un mensaje especial para ti:</h3>
+    <p id="final-message-text" style="font-size: 1.1em; line-height: 1.6; color: #555;">
+        ¡Feliz Cumpleaños, Xiomara! Este año ha sido de altos y bajos para nosotros, 
+        pero prefiero quedarme con buenos momentos . <br>
+        Espero que este día esté lleno de toda la alegría, la paz y el amor que te mereces,
+        aunq se que no estoy a tu lado y no sabes como me encantaria poder verte aunq sea un momento....! <br>
+        Gracias por ser una persona tan maravillosa... <br>
+        Por muchos años más de risas y momentos inolvidables. Te quiero. ❤️
+    </p>
+    <p style="margin-top: 20px; font-weight: bold; text-align: right;">Con mucho cariño tu amigo, MAX </p>
+</div>
+        </div>
+    </div>
+    
+    <!-- Inicio del código JavaScript -->
+    <script>
+        // --- Configuración de la Fecha de Cumpleaños ---
+    // Día de cumpleaños (modificar aquí si cambia)
+    const DIA_CUMPLE = 2; // Día de cumpleaños
+    // Mes de cumpleaños (modificar aquí si cambia)
+    const MES_CUMPLE = 10;  // Mes de cumpleaños
+        // ----------------------------------------------
+
+        // --- REFERENCIAS DE ELEMENTOS ---
+    // Referencias a los elementos del DOM
+    const statusMessage = document.getElementById('status-message');
+        const verificationSection = document.getElementById('verification-section');
+        const animationContainer = document.getElementById('animation-container');
+        const birthdayMessage = document.getElementById('birthday-message');
+        const introScreen = document.getElementById('intro-screen');
+        const introMessageContainer = document.getElementById('intro-message-container');
+        const mainContainer = document.getElementById('container');
+    const song = document.getElementById('birthday-song'); // Audio de fondo
+    const successSound = document.getElementById('success-sound'); // Sonido de éxito
+    const errorSound = document.getElementById('error-sound'); // Sonido de error
+    const showCardBtn = document.getElementById('show-card-btn'); // Botón para mostrar tarjeta
+    const cardSection = document.getElementById('card-section'); // Tarjeta de felicitación
+    const body = document.body; // Referencia al body
+
+
+        // --- LÓGICA DE LA INTRODUCCIÓN CON EFECTO MÁQUINA DE ESCRIBIR ---
+    // Texto de introducción para el efecto máquina de escribir
+    const introText = "Holi 🥰, hoy es un día especial y te tengo una SORPRESA...";
+    let charIndex = 0; // Índice del caracter actual
+    let typingTimeout; // Timeout para el efecto de escritura
+
+    // Función para mostrar el texto letra por letra
+    function typeWriterEffect() { 
+             if (charIndex < introText.length) {
+                let char = introText.charAt(charIndex);
+                if (char === '*' && introText.charAt(charIndex + 1) === '*') {
+                    introMessageContainer.innerHTML += '<span style="color: var(--birthday-pink); font-weight: bold;">';
+                    charIndex += 2;
+                    while (charIndex < introText.length && introText.charAt(charIndex) !== '*') {
+                        introMessageContainer.innerHTML += introText.charAt(charIndex);
+                        charIndex++;
+                    }
+                    if (introText.charAt(charIndex) === '*') {
+                        introMessageContainer.innerHTML += '</span>';
+                        charIndex++;
+                    }
+                    introMessageContainer.classList.remove('typing-cursor'); 
+                    setTimeout(() => introMessageContainer.classList.add('typing-cursor'), 100);
+                } else {
+                    introMessageContainer.innerHTML += char;
+                    charIndex++;
+                }
+                introMessageContainer.classList.add('typing-cursor');
+                typingTimeout = setTimeout(typeWriterEffect, 70); 
+            } else {
+                introMessageContainer.classList.remove('typing-cursor');
+            }
+        }
+
+    // Inicia el efecto máquina de escribir al cargar la página
+    document.addEventListener('DOMContentLoaded', () => { typeWriterEffect(); });
+    // Oculta la pantalla de introducción y muestra el contenido principal
+    function hideIntroScreen() { 
+    clearTimeout(typingTimeout); 
+    introScreen.style.opacity = '0';
+    song.currentTime = 0;
+    song.muted = false;
+    song.volume = 1.0; // Volumen al máximo
+    song.play().then(()=>{
+        // Música reproducida correctamente
+    }).catch(e => {
+        alert('Activa el audio en tu navegador para escuchar la música de cumpleaños.');
+    });
+    setTimeout(() => {
+        introScreen.style.display = 'none';
+        mainContainer.style.display = 'block';
+        if (window.innerWidth <= 600) { mainContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }, 500); 
+        }
+
+        // --- FUNCIONES DE SONIDO Y ANIMACIÓN ---
+    // Reproduce un sonido (éxito o error)
+    function playSound(soundElement) {
+            if (soundElement) { soundElement.currentTime = 0; soundElement.play().catch(e => console.log("Error al reproducir sonido.")); }
+        }
+
+    // Crea elementos de confeti animados
+    function crearConfeti() {
+            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+            for (let i = 0; i < 75; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                confetti.style.animationDelay = `-${Math.random() * 5}s`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.opacity = '1'; // Aseguramos que inicie visible
+                body.appendChild(confetti);
+            }
+        }
+        
+    // Crea globos animados en la pantalla
+    function crearGlobos() {
+            const balloonTexts = ['🎈', '🥳', '🎁', '🎂', '🎊'];
+             for (let i = 0; i < 5; i++) {
+                const balloon = document.createElement('div');
+                balloon.classList.add('balloon');
+                balloon.textContent = balloonTexts[i % balloonTexts.length];
+                balloon.style.left = `${(i * 15) + 5}%`;
+                balloon.style.animationDuration = `${Math.random() * 5 + 8}s`;
+                balloon.style.animationDelay = `${i * 1.5}s`;
+                balloon.style.opacity = '1'; // Aseguramos que inicie visible
+                body.appendChild(balloon);
+             }
+        }
+
+    // Muestra la animación de cumpleaños y el mensaje personalizado
+    function animacionCumpleanos(name) {
+            playSound(song);
+
+            verificationSection.style.display = 'none'; 
+            animationContainer.style.display = 'flex'; 
+            showCardBtn.style.display = 'block';
+
+            const personalizedName = name ? name : '¡Cumpleañera!';
+            birthdayMessage.innerHTML = `🎉 ¡FELIZ CUMPLEAÑOS, ${personalizedName.toUpperCase()}! 🎉`;
+            
+            crearConfeti();
+            crearGlobos();
+            mainContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+    // Muestra la tarjeta de felicitación final
+    function showCardSection() {
+            showCardBtn.style.display = 'none'; 
+            cardSection.style.display = 'block';
+            cardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // --- FUNCIÓN DE VERIFICACIÓN (Lógica) ---
+    // Verifica si la fecha ingresada es la del cumpleaños
+    function verificarFecha() {
+            const nameInput = document.getElementById('name').value.trim(); // Nombre ingresado
+            const dayInput = document.getElementById('day').value; // Día ingresado
+            const monthInput = document.getElementById('month').value; // Mes ingresado
+            
+            const diaIngresado = parseInt(dayInput); // Día como número
+            const mesIngresado = parseInt(monthInput); // Mes como número
+
+            // Validación de datos ingresados
+            if (isNaN(diaIngresado) || isNaN(mesIngresado) || diaIngresado < 1 || diaIngresado > 31 || mesIngresado < 1 || mesIngresado > 12) {
+                statusMessage.innerHTML = `<span style="color: red; font-weight: bold;">❌ Error: Introduce números válidos.</span>`;
+                playSound(errorSound);
+                return;
+            }
+
+            // Si el día no coincide con el cumpleaños
+            if (diaIngresado !== DIA_CUMPLE) {
+                statusMessage.innerHTML = `🤔 Hoy es día ${diaIngresado}. Estas segura???.`;
+                playSound(errorSound);
+                return;
+            }
+
+            // Si el mes es correcto, muestra animación
+            if (mesIngresado === MES_CUMPLE) {
+                statusMessage.innerHTML = `<span style="color: var(--birthday-pink); font-weight: bold;">🥳 ¡FELICIDADES! ¡La fecha es correcta!</span>`;
+                playSound(successSound);
+                setTimeout(() => animacionCumpleanos(nameInput), 1000); 
+            } else { // Si el mes no es correcto, muestra error
+                statusMessage.innerHTML = `<span style="color: red; font-weight: bold;">❌ no es la fecha correcta Vuelve a intentarlo.</span>`;
+                playSound(errorSound);
+            }
+        }
+    </script> <!-- Fin del código JavaScript -->
+</body> <!-- Fin del cuerpo -->
+</html> <!-- Fin del documento -->
